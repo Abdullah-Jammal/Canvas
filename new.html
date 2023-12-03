@@ -1,0 +1,306 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+    .img {
+        width: 100%;
+        object-fit: contain;
+    }
+
+    .img_bg_container {
+        width: 100%;
+        height: fit-content;
+        position: relative;
+        --bs-gutter-x: 1.5rem;
+        --bs-gutter-y: 0;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .voice_box {
+        position: absolute;
+    }
+
+    .startGame > span {
+        background-color: blue;
+        width: 100%;
+        height: 100%;
+        display: block;
+        color: #fff;
+        border-radius: 12px;
+        font-weight: bold;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 20px;
+        animation: btn-animate 3s linear infinite;
+    }
+
+    @keyframes btn-animate {
+        0%, 100% {
+            opacity: 1;
+            background-color: blue;
+        }
+        50% {
+            opacity: .6;
+            background-color: green;
+        }
+    }
+
+    .main-popUp {
+        opacity: .95;
+        border-radius: 20px;
+        animation: main-pop 300ms ease-in-out;
+        display: none;
+        width: 100%;
+        height: 100%;
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #drawing-board {
+        background-image: url(https://learner.ta3leem.iq/asset-v1:Ta3leem+1+2022_2023+type@asset+block@كتاب_العلوم_الاول_الابتدائي__1__page-0069.jpg);
+        background-position: center;
+        background-size: contain;
+        background-repeat: no-repeat;
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+    }
+
+    @keyframes main-pop {
+        0% {
+            scale: 0;
+        }
+        100% {
+            scale: 1;
+        }
+    }
+
+    .close-popUp {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-weight: bold;
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+    background-color: rgb(172, 22, 22);
+    color: #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    z-index: 999;
+}
+
+#clear {
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+    transform: translateX(-50%);
+    background-color: rgb(172, 22, 22);
+    width: 180px;
+    height: 60px;
+    display: block;
+    color: #fff;
+    border-radius: 12px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    animation: btn-animation 3s linear infinite;
+    z-index: 999;
+}
+
+@keyframes btn-animation {
+    0%, 100% {
+        background-color: rgb(172, 22, 22);
+    }
+    50% {
+        background-color: rgb(255, 94, 158);
+    }
+}
+
+.container-canvas {
+    position: relative;
+    height: 100%;
+}
+</style>
+
+<div class="img_bg_container">
+    <img class="img" src="https://learner.ta3leem.iq/asset-v1:Ta3leem+1+2022_2023+type@asset+block@كتاب_العلوم_الاول_الابتدائي__1__page-0069.jpg">
+
+    <div class="voice_box drag_resize startGame" id="moving" style="top: 12.0936%; cursor: s-resize; height: 4.68937%; left: 32.4413%; width: 13.9532%;" ;="" left:="" '100px'="">
+        <span>أوصل</span>
+    </div>
+
+
+    <div class="drag_resize main-popUp" style="top: 0; cursor: e-resize; height: 100%; left: 0; width: 100%; position: fixed;">
+        <div class="close-popUp">X</div>
+
+        <div class="toolbar">
+            <span id="clear">مسح الصفحه</span>
+        </div>
+
+        <section class="container-canvas">
+            <canvas id="drawing-board"></canvas>
+        </section>
+    </div>
+
+</div>
+
+<script>
+
+    // Start Canvas
+
+    let clear = document.querySelector('.clear')
+    let toolbar = document.querySelector('.toolbar')
+
+    const canvas = document.getElementById('drawing-board');
+    const ctx = canvas.getContext('2d');
+
+    const canvasOffsetX = canvas.offsetLeft;
+    const canvasOffsetY = canvas.offsetTop;
+
+    canvas.width = window.innerWidth - canvasOffsetX;
+    canvas.height = window.innerHeight - canvasOffsetY;
+
+    let isPainting = false;
+    let lineWidth = 2;
+    let startX;
+    let startY;
+
+    const draw = (e) => {
+        if(!isPainting) {
+            return;
+        }
+        ctx.lineWidth = lineWidth;
+        ctx.lineCap = 'round';
+    
+        ctx.lineTo(e.clientX - canvasOffsetX, e.clientY);
+        ctx.stroke();
+    }
+    
+    canvas.addEventListener('pointerdown', (e) => {
+        e.preventDefault()
+        isPainting = true;
+        startX = e.clientX;
+        startY = e.clientY;
+    });
+    
+    canvas.addEventListener('pointerup', e => {
+        isPainting = false;
+        ctx.stroke();
+        ctx.beginPath();
+    });
+    
+    canvas.addEventListener('pointermove', draw);
+
+
+
+    toolbar.addEventListener('click', e => {
+            if (e.target.id === 'clear') {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+            }
+        });
+
+    // End Canvas
+
+let startGame = document.querySelector('.startGame > span')
+let mainPopup = document.querySelector('.main-popUp')
+let closeBtn = document.querySelector('.close-popUp')
+
+startGame.addEventListener('click', () => {
+    mainPopup.style.display = 'flex'
+})
+
+closeBtn.addEventListener('click', () => {
+    mainPopup.style.display = 'none'
+})
+
+let timeDuration;
+let audios = document.querySelectorAll('audio');
+audios.forEach(audio => {
+    audio.addEventListener('loadedmetadata', function() {
+    timeDuration=audio.duration
+    });
+});
+
+// Reading The Texts
+function   highlightTest(id,ele) {
+closeDiv()
+    let audio = document.getElementById(id)
+    replayAudio(id)
+    ele.style.backgroundColor='rgb(255,255,160)'
+    ele.style.opacity='0.4'
+    setTimeout(function(){
+                closeDiv()
+            },audio.duration*1000
+            )
+        }
+
+// Closing HighlightText Function
+function closeDiv() {
+    let allDives = document.querySelectorAll('#moving')
+    allDives.forEach((ele ) => {
+        ele.style.border = 'none';
+        ele.style.backgroundColor='transparent'
+        ele.style.opacity='1'
+    })
+}
+
+// Start Win Senario Functino
+function winSenario(item, winAudio) {
+    item.style.backgroundColor = '#0cc835'
+    item.style.color = '#fff'
+    audioPlay(winAudio)
+}
+// End Win Senario Functino
+
+// Start Loss Senario Function
+function lossSenario(item, lossAudio) {
+    item.style.backgroundColor = '#E43232'
+    item.style.color = '#fff'
+    audioPlay(lossAudio)
+}
+// End Loss Senario Function
+
+// reply audio function
+function replayAudio(id) {
+var audioElements = document.getElementsByTagName('audio');
+for (var i = 0; i < audioElements.length; i++) {
+    var audio = audioElements[i];
+    if (audio !== null && audio.id !== id) {
+    audio.pause();
+    }
+}
+
+// Replay the selected audio
+var selectedAudio = document.getElementById(id);
+if (selectedAudio !== null) {
+selectedAudio.currentTime = 0;
+selectedAudio.play();
+}
+}
+// End Reply audio function
+
+
+</script>
+<script src="https://unpkg.com/@lottiefiles/lottie-player@0.4.0/dist/tgs-player.js"></script>
+<script src="https://unpkg.com/@lottiefiles/lottie-player@1.5.7/dist/lottie-player.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
+
